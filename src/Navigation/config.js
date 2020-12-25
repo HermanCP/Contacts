@@ -30,8 +30,8 @@ function WrappedComponent(Component) {
 export function registerScreens() {
   Navigation.registerComponent('Main.Contact.Component', () =>WrappedComponent(MainContact));
   Navigation.registerComponent('Initializing', () => (initializing));
-  Navigation.registerComponent('View.Contacts', () => (ViewContacts));
-  Navigation.registerComponent('Action.Contacts', () => (ContactAction));
+  Navigation.registerComponent('View.Contacts', () => WrappedComponent(ViewContacts));
+  Navigation.registerComponent('Action.Contacts', () => WrappedComponent(ContactAction));
   Navigation.registerComponent('Icon.Add', () => IconAdd);
   Navigation.registerComponent('Icon.Edit', () => IconEdit);
   

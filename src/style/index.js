@@ -45,7 +45,9 @@ export default StyleSheet.create({
         fontWeight: '200',
     },
     listContainer: {
-        backgroundColor: "red",
+        backgroundColor: colors.withe,
+        borderBottomWidth:1,
+        borderBottomColor:colors.greyBorder,
         padding: 20,
         flexDirection: 'row',
         alignItems: 'center'

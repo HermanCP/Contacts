@@ -12,11 +12,15 @@ import {
     Dimensions,
     Animated
 } from 'react-native'
+import { connect } from 'react-redux';
+import {GetListContacts} from '../redux/actions/contactAction'
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker'
 import { Navigation } from 'react-native-navigation';
 import navigation from '../Navigation';
 import styles, { colors } from '../style'
 import Service from '../service'
+import Loader from '../loading/LoaderInScreen'
+import Toast from 'react-native-simple-toast';
 const { width, height } = Dimensions.get("window");
 
 Navigation.events().registerNavigationButtonPressedListener(
@@ -27,7 +31,7 @@ Navigation.events().registerNavigationButtonPressedListener(
         }
     });
 
-const ActionContact = props => {
+const ActionContact = ({ componentId, ...props }) => {
     const { mode } = props
     const [isbuttonenable, setIsbuttonenable] = useState(true)
     const [firstName, setFirsname] = useState(null)
@@ -41,6 +45,7 @@ const ActionContact = props => {
     const [foto, setFoto] = useState(null)
     const [fileSend, setFileSend] = useState(null)
     const [loadingImage, setLoadingImage] = useState(false)
+    const [loadingHttp, setLoadingHttp] = useState(false)
 
     const onChangeFirstName = (val) => {
         if (val === '') {
@@ -120,39 +125,19 @@ const ActionContact = props => {
             },
         };
         launchImageLibrary(options, (response) => {
-            // Same code as in above section!
-            console.log('response image1111', response)
             setLoadingImage(false)
-            // const source = { uri: response.uri };
-            // const source = response.uri;
+
+            const realPath = Platform.OS === 'ios' ? response.uri.replace('file://', '') : response.uri;
+            setFoto(realPath)
             setFileSend(response)
-            var source;
-            if (Platform.OS === 'android') {
-                source = response.uri
-            } else {
-                source = response.uri
-            }
-            setFoto(source)
-            const data = new FormData();
-            data.append('files', {
-                uri: response.uri,
-                type: response.type,
-                name: response.fileName
-            });
-            const config = {
-                // method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'multipart/form-data',
-                },
-                body: data,
-            };
+
             console.log('file send', fileSend)
 
 
         });
     }
     const AddContact = () => {
+        setLoadingHttp(true)
         let data = {
             firstName: firstName,
             lastName: lastName,
@@ -164,15 +149,21 @@ const ActionContact = props => {
         Service.AddContact(data)
             .then(response => {
                 console.log('response', response);
-
+                const res = JSON.parse(response.data)
+                setLoadingHttp(false)
                 if (res.status === true) {
+                    props.dispatch(GetListContacts())
+                    Toast.showWithGravity('Berhasil tambah data', Toast.LONG, Toast.TOP)
+                    Navigation.dismissModal(componentId)
                 } else if (res.status == false) {
+                    Toast.showWithGravity('Terjadi kesalahan pada server, mohon tunggu beberapa saat', Toast.LONG, Toast.TOP)
                 } else {
                 }
 
             })
             .catch(e => {
-                // setLoadingApi(false)
+                Toast.showWithGravity('Server sedang padat, mohon tunggu beberapa saat lagi', Toast.LONG, Toast.TOP)
+                setLoadingHttp(false)
                 console.log(e);
             });
     }
@@ -182,20 +173,25 @@ const ActionContact = props => {
             <View style={{ flex: 1, }}>
                 <View style={{ alignItems: 'center', padding: 30 }}>
                     <TouchableOpacity activeOpacity={.7} onPress={() => choosePicture()} style={styles.header}>
-                        {/* <View style={{}}> */}
+
                         {
                             foto !== null ?
                                 <Image source={{ uri: foto }} style={{ height: 100, width: 100, borderRadius: 100 }} />
                                 :
                                 <>
-                                    <Image source={require('../images/profile.png')} style={{ height: 50, width: 50 }} />
-                                    <View style={{ position: 'absolute', right: 10, top: '73%', backgroundColor: colors.greyBorder, padding: 5, borderRadius: 100 }}>
-                                        <Image source={require('../images/add-photo.png')} style={{ height: 20, width: 20 }} />
-                                    </View>
+                                    {
+                                        loadingImage ?
+                                            <Loader loading={loadingImage} />
+                                            :
+                                            <>
+                                                <Image source={require('../images/profile.png')} style={{ height: 50, width: 50 }} />
+                                                <View style={{ position: 'absolute', right: 10, top: '73%', backgroundColor: colors.greyBorder, padding: 5, borderRadius: 100 }}>
+                                                    <Image source={require('../images/add-photo.png')} style={{ height: 20, width: 20 }} />
+                                                </View>
+                                            </>
+                                    }
                                 </>
                         }
-
-                        {/* </View> */}
 
                     </TouchableOpacity>
 
@@ -265,13 +261,23 @@ const ActionContact = props => {
                     style={[styles.Button, { backgroundColor: isbuttonenable ? colors.grey : colors.green, borderRadius: 15, marginVertical: 10 }]}
                     onPress={() => AddContact()}
                 >
-                    <Text style={[styles.buttonText, { color: 'white' }]}>Simpan</Text>
-
-
+                    {
+                        loadingHttp ?
+                            <Loader loading={loadingHttp} />
+                            :
+                            <Text style={[styles.buttonText, { color: 'white' }]}>Simpan</Text>
+                    }
                 </TouchableOpacity>
             </View>
         </View>
     )
 }
 
-export default ActionContact;
+const mapStateToProps = state => ({
+    isLoading: state.contact.isLoading,
+    contact: state.contact.ListContacts,
+    error: state.contact.error,
+})
+
+
+export default connect(mapStateToProps, null)(ActionContact)

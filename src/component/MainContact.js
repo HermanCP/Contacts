@@ -15,10 +15,11 @@ import { Navigation } from 'react-native-navigation';
 import navigation from '../Navigation';
 import styles, { colors } from '../style'
 import { connect } from 'react-redux';
+import Loader from '../loading/LoaderInScreen'
 import { GetListContacts } from '../redux/actions/contactAction'
 
 
-const ContactComponent = ({componentId, ...props }) => {
+const ContactComponent = ({ componentId, ...props }) => {
     const { isLoading, contact, error } = props;
     useEffect(() => {
         getContact()
@@ -29,7 +30,7 @@ const ContactComponent = ({componentId, ...props }) => {
     }, [])
 
 
-    const ViewContacts=(id) => {
+    const ViewContacts = (id) => {
         Navigation.push(componentId, navigation.views.ViewContacts(id));
     }
 
@@ -38,12 +39,12 @@ const ContactComponent = ({componentId, ...props }) => {
         <View style={styles.container}>
             {
                 isLoading ?
-                    <ActivityIndicator />
+                    <Loader loading={isLoading} />
                     :
                     <>
                         {
                             error ?
-                                <View>
+                                <View style={{justifyContent:'center', alignItems:'center'}}>
                                     <Text>Terjadi kesalahan pada server</Text>
                                 </View>
                                 :
@@ -53,15 +54,21 @@ const ContactComponent = ({componentId, ...props }) => {
                                         renderItem={({ item, index }) => (
                                             <TouchableOpacity activeOpacity={.7} onPress={() => ViewContacts(item.id)} style={styles.listContainer}>
                                                 <View style={styles.cyrcleImage}>
-                                                    <View style={{}}>
-                                                        <Image source={require('../images/profile.png')} style={{ height: 40, width: 40 }} />
-                                                    </View>
+                                                        {
+                                                            item.avatar !== null ?
+                                                                <Image source={{ uri: item.avatar }} style={{ height: 50, width: 50, borderRadius: 100 }} />
+                                                                : <Image source={require('../images/profile.png')} style={{ height: 40, width: 40 }} />
+                                                        }
                                                 </View>
                                                 <View style={{ marginHorizontal: 20 }}>
                                                     <Text>{item.firstName}</Text>
                                                 </View>
                                                 <View style={styles.Favorites}>
-                                                    <Image source={require('../images/favorite.png')} style={{ height: 30, width: 30 }} />
+                                                    {
+                                                        item.isFavorites === 1 ?
+                                                            <Image source={require('../images/favorite.png')} style={{ height: 30, width: 30 }} />
+                                                            : null
+                                                    }
                                                 </View>
 
                                             </TouchableOpacity>

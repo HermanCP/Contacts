@@ -1,3 +1,7 @@
+
+import {
+    Platform,
+} from 'react-native'
 import http from "../http-common";
 import RNFetchBlob from 'rn-fetch-blob'
 
@@ -5,6 +9,7 @@ import RNFetchBlob from 'rn-fetch-blob'
 
 const AddContact = async(data) => {
     console.log('data  user ======>', data)
+    const realPath = Platform.OS === 'ios' ? data.files.uri.replace('file://', '') : data.files.uri;
     return  RNFetchBlob.fetch(
       'POST',
       'http://172.20.10.3:3000/api/v1/AddContacts',
@@ -12,7 +17,7 @@ const AddContact = async(data) => {
         'Content-Type': 'multipart/form-data',
       },
       [
-        {name: 'files', filename: data.files.fileName, data: RNFetchBlob.wrap(data.files.uri)},
+        {name: 'files', filename: data.files.fileName, data: RNFetchBlob.wrap(realPath)},
         {name : 'firstName', data:data.firstName},
         {name : 'lastName', data:data.lastName},
         {name : 'mobile', data:data.mobile},
@@ -60,12 +65,12 @@ const updateUser = async(data) => {
   }
   
 };
-const tambahAnggota =(data)=> {
-  return http.post(`/tambahAnggota`, data)
+const GetContacts =(id)=> {
+  return http.get(`/GetContacts/${id}`)
 }
 
 export default {
     AddContact,
-    tambahAnggota,
+    GetContacts,
     updateUser,
 };
