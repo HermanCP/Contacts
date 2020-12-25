@@ -22,13 +22,13 @@ const Add = ({componentId, ...props}) => {
     const { iconSrc } = props;
 
 
-    const AddContact =()=> {
+    const ModeContact =(mode="add")=> {
         // Navigation.push(componentId, navigation.views.actionContact());
-        Navigation.showModal(navigation.actionContacts());
+        Navigation.showModal(navigation.actionContacts(mode));
     }
 
     return (
-        <TouchableOpacity onPress={() => AddContact()}>
+        <TouchableOpacity onPress={() => ModeContact()}>
             <View style={styles.container}>
                 <Image source={iconSrc} resizeMode="contain"  style={{width:20,height:20}}/>
             </View>

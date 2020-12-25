@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
     View,
     Text,
@@ -17,17 +17,6 @@ import navigation from '../Navigation';
 import styles, { colors } from '../style'
 const { width, height } = Dimensions.get("window");
 
-const dataList = [
-    {
-        id: 1,
-        title: 'Mobile',
-    },
-    {
-        id: 2,
-        title: 'Email',
-
-    },
-]
 Navigation.events().registerNavigationButtonPressedListener(
     ({ buttonId, componentId }, { ...props }) => {
         console.log(buttonId)
@@ -37,64 +26,94 @@ Navigation.events().registerNavigationButtonPressedListener(
     });
 
 const ActionContact = props => {
+    const { mode } = props
+    const [firstName, setFirsname] = useState(null)
+    const [lastName, setLasname] = useState(null)
+    const [mobile, setMobile] = useState(null)
+    const [email, setEmail] = useState(null)
 
+    const onChangeFirstName = () => {
 
+    }
+    const onChangeLastName = () => {
+
+    }
+    const onChangeMobile = () => {
+
+    }
+    const onChangeEmail = () => {
+
+    }
     return (
         <View style={styles.container}>
             <View style={{ flex: 1, }}>
-                <View style={{ backgroundColor: 'red', alignItems: 'center' }}>
-                    <View style={{
-                        backgroundColor: 'grey',
-                        borderRadius: 100,
-                        width: 100,
-                        height: 100,
-                        justifyContent: 'center',
-                        alignItems: 'center'
-                    }}>
+                <View style={{ backgroundColor: 'red', alignItems: 'center', padding:30 }}>
+                    <View style={styles.header}>
                         <View style={{}}>
                             <Image source={require('../images/profile.png')} style={{ height: 50, width: 50 }} />
                         </View>
                     </View>
-                    <View>
-                        <Text style={styles.titlePrimary}>namanya</Text>
-                    </View>
-                    <View style={{ flex: 1, flexDirection: 'row' }}>
-                        <View style={styles.actionBox}>
-                            <View style={styles.actionUser}>
-                                <Image source={require('../images/favorite.png')} style={{ height: 50, width: 50 }} />
-                            </View>
-                            <Text style={[styles.subtitlePrimary, { marginVertical: 5 }]}>message</Text>
-                        </View>
-                        <View style={styles.actionBox}>
-                            <View style={styles.actionUser}>
-                                <Image source={require('../images/favorite.png')} style={{ height: 50, width: 50 }} />
-                            </View>
-                            <Text style={[styles.subtitlePrimary, { marginVertical: 5 }]}>call</Text>
-                        </View>
-                        <View style={styles.actionBox}>
-                            <View style={styles.actionUser}>
-                                <Image source={require('../images/favorite.png')} style={{ height: 50, width: 50 }} />
-                            </View>
-                            <Text style={[styles.subtitlePrimary, { marginVertical: 5 }]}>email</Text>
-                        </View>
-                        <View style={styles.actionBox}>
-                            <View style={styles.actionUser}>
-                                <Image source={require('../images/favorite.png')} style={{ height: 50, width: 50 }} />
-                            </View>
-                            <Text style={[styles.subtitlePrimary, { marginVertical: 5 }]}>favorite</Text>
-                        </View>
-                    </View>
+
+                </View>
+                <View style={{ padding: 20 }}>
+                    <Text style={styles.subtitlePrimary}>First Name</Text>
+                    <TextInput
+                        style={styles.TitleInput}
+                        placeholder='Ex: Edo kenadi'
+                        autoCapitalize="none"
+                        clearButtonMode="always"
+                        autoCorrect={false}
+                        underlineColorAndroid={colors.greyBorder}
+                        onChangeText={val => onChangeFirstName(val)}
+                    />
+                </View>
+                <View style={{ padding: 20 }}>
+                    <Text style={styles.subtitlePrimary}>Last Name</Text>
+                    <TextInput
+                        style={styles.TitleInput}
+                        placeholder='Ex: Edo kenadi'
+                        autoCapitalize="none"
+                        clearButtonMode="always"
+                        autoCorrect={false}
+                        underlineColorAndroid={colors.greyBorder}
+                        onChangeText={val => onChangeLastName(val)}
+                    />
+                </View>
+                <View style={{ padding: 20 }}>
+                    <Text style={styles.subtitlePrimary}>Mobile</Text>
+                    <TextInput
+                        style={styles.TitleInput}
+                        placeholder='Ex: Edo kenadi'
+                        autoCapitalize="none"
+                        clearButtonMode="always"
+                        autoCorrect={false}
+                        underlineColorAndroid={colors.greyBorder}
+                        onChangeText={val => onChangeMobile(val)}
+                    />
+                </View>
+                <View style={{ padding: 20 }}>
+                    <Text style={styles.subtitlePrimary}>Email</Text>
+                    <TextInput
+                        style={styles.TitleInput}
+                        placeholder='Ex: Edo kenadi'
+                        autoCapitalize="none"
+                        clearButtonMode="always"
+                        autoCorrect={false}
+                        underlineColorAndroid={colors.greyBorder}
+                        onChangeText={val => onChangeEmail(val)}
+                    />
                 </View>
             </View>
-            <View style={{ flex:2}}>
-                <View style={{padding:20, flexDirection:'row', borderBottomWidth:1,borderBottomColor:colors.greyBorder}}>
-                    <Text style={styles.titleList}>Mobile : </Text>
-                    <Text style={[styles.subtitlePrimary,{marginHorizontal:20}]}>0989890</Text>
-                </View>
-                <View style={{padding:20, flexDirection:'row', borderBottomWidth:1,borderBottomColor:colors.greyBorder}}>
-                    <Text style={styles.titleList}>Email : </Text>
-                    <Text style={[styles.subtitlePrimary,{marginHorizontal:20}]}>0989890</Text>
-                </View>
+            <View style={{ flex: .15, margin: 10 }}>
+                <TouchableOpacity activeOpacity={0.5}
+
+                    style={[styles.Button, { backgroundColor: colors.green, borderRadius: 15, marginVertical: 10 }]}
+                    onPress={props.onRequestClose}
+                >
+                    <Text style={[styles.buttonText, { color: 'white' }]}>Simpan</Text>
+
+
+                </TouchableOpacity>
             </View>
         </View>
     )

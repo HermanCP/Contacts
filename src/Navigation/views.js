@@ -51,9 +51,12 @@ export const MainContact = () => ({
 });
 
 
-export const actionContact = () => ({
+export const actionContact = (mode) => ({
   id: 'Action.Contacts',
   name: 'Action.Contacts',
+  passProps:{
+    mode:mode
+  },
   options: {
     modalPresentationStyle: 'overCurrentContext',
     layout: {
@@ -74,6 +77,7 @@ export const actionContact = () => ({
             name: 'Icon.Edit',
             passProps: {
               originComponentId: 'Add.Topbar',
+              action:mode === 'add' ? "Simpan":"Done"
             },
           },
         },

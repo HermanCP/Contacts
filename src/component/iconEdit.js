@@ -19,19 +19,17 @@ const { width, height } = Dimensions.get("window");
 
 
 const Add = ({componentId, ...props}) => {
-    const { iconSrc } = props;
+    const { action} = props;
 
 
     const Edit =()=> {
-        alert('sini')
         Navigation.push(componentId, navigation.views.Contacts());
-        // Navigation.showModal(navigation.actionContacts());
     }
 
     return (
         <TouchableOpacity onPress={() => Edit()}>
             <View style={styles.container}>
-                <Text>Edit</Text>
+                <Text>{action}</Text>
             </View>
         </TouchableOpacity>
     )
