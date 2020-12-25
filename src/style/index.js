@@ -65,7 +65,7 @@ export default StyleSheet.create({
         bottom: 0
     },
     header: {
-        backgroundColor: 'grey',
+        backgroundColor: colors.greyBorder,
         borderRadius: 100,
         width: 100,
         height: 100,
