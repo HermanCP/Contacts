@@ -10,6 +10,17 @@ const MainContact = () =>({
   },
 })
 
+const actionContacts = () => ({
+    stack: {
+      children: [{
+        component: views.actionContact()
+      }]
+    }
+})
+
 export {
-  MainContact
+  views,
+  MainContact,
+  actionContacts
+
 }

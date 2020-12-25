@@ -31,6 +31,114 @@ export const MainContact = () => ({
       visible: true,
       elevation: 0,
       noBorder: true,
+      rightButtons: [
+        {
+          id: 'customRightBtnId',
+          component: {
+            name: 'Icon.Add',
+            passProps: {
+              originComponentId: 'Add.Topbar',
+              iconSrc: require('../images/add.png'),
+            },
+          },
+        },
+      ],
+    },
+    animations: {
+      push: parts.animationPush(),
+    },
+  }
+});
+
+
+export const actionContact = () => ({
+  id: 'Action.Contacts',
+  name: 'Action.Contacts',
+  options: {
+    modalPresentationStyle: 'overCurrentContext',
+    layout: {
+      backgroundColor: 'white'
+    },
+    topBar: {
+      visible: true,
+      elevation: 0,
+      noBorder: true,
+      leftButtons: {
+        id: 'Main.Contact.Component',
+        icon: require('../images/icon_back.png')
+      },
+      rightButtons: [
+        {
+          id: 'customRightBtnId',
+          component: {
+            name: 'Icon.Edit',
+            passProps: {
+              originComponentId: 'Add.Topbar',
+            },
+          },
+        },
+      ],
+    },
+  }
+}); 
+export const ViewContacts = (id) => ({
+  component: {
+    id: 'View.Contacts',
+    name: 'View.Contacts',
+    passProps:{
+      id:id
+    },
+    options: {
+      statusBar: {
+        visible: true,
+        style: "dark",
+        backgroundColor: colors.withe
+      },
+      topBar: {
+        visible: true,
+        elevation: 0,
+        noBorder: true,
+        background: {
+          color: colors.withe
+        },
+        leftButtons: {
+          id: 'Main.Contact.Component',
+          icon: require('../images/icon_back.png')
+        },
+            rightButtons: [
+        {
+          id: 'customRightBtnId',
+          component: {
+            name: 'Icon.Edit',
+            passProps: {
+              originComponentId: 'Add.Topbar',
+            },
+          },
+        },
+      ],
+      },
+      animations: {
+        // setRoot: parts.animationSetRoot(),
+        push: parts.animationPush(),
+        // pop: parts.animationPop()
+      },
+    }
+  }
+}); 
+
+export const Contacts = () => ({
+  id: 'Action.Contacts',
+  name: 'Action.Contacts',
+  options: {
+    statusBar: {
+      visible: true,
+      style: "dark",
+      backgroundColor: colors.withe
+    },
+    topBar: {
+      visible: true,
+      elevation: 0,
+      noBorder: true,
     },
     animations: {
       push: parts.animationPush(),
