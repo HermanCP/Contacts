@@ -51,11 +51,12 @@ export const MainContact = () => ({
 });
 
 
-export const actionContact = (mode) => ({
+export const actionContact = (mode,id) => ({
   id: 'Action.Contacts',
   name: 'Action.Contacts',
-  passProps:{
-    mode:mode
+  passProps: {
+    mode: mode,
+    id:id
   },
   options: {
     modalPresentationStyle: 'overCurrentContext',
@@ -70,27 +71,15 @@ export const actionContact = (mode) => ({
         id: 'Main.Contact.Component',
         icon: require('../images/icon_back.png')
       },
-      rightButtons: [
-        {
-          id: 'customRightBtnId',
-          component: {
-            name: 'Icon.Edit',
-            passProps: {
-              originComponentId: 'Add.Topbar',
-              action:mode === 'add' ? "Simpan":"Done"
-            },
-          },
-        },
-      ],
     },
   }
-}); 
+});
 export const ViewContacts = (id) => ({
   component: {
     id: 'View.Contacts',
     name: 'View.Contacts',
-    passProps:{
-      id:id
+    passProps: {
+      id: id
     },
     options: {
       statusBar: {
@@ -109,17 +98,19 @@ export const ViewContacts = (id) => ({
           id: 'Main.Contact.Component',
           icon: require('../images/icon_back.png')
         },
-            rightButtons: [
-        {
-          id: 'customRightBtnId',
-          component: {
-            name: 'Icon.Edit',
-            passProps: {
-              originComponentId: 'Add.Topbar',
+        rightButtons: [
+          {
+            id: 'customRightBtnIdView',
+            component: {
+              name: 'Icon.Edit',
+              passProps: {
+                originComponentId: 'Add.Topbar',
+                action:'Edit',
+                id:id
+              },
             },
           },
-        },
-      ],
+        ],
       },
       animations: {
         // setRoot: parts.animationSetRoot(),
@@ -128,7 +119,7 @@ export const ViewContacts = (id) => ({
       },
     }
   }
-}); 
+});
 
 export const Contacts = () => ({
   id: 'Action.Contacts',
@@ -150,6 +141,6 @@ export const Contacts = () => ({
   }
 });
 
- 
+
 
 

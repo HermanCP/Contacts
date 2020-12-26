@@ -1,31 +1,30 @@
 import {
-    FETCHING_LIST_CONTACT,
-    FETCHING_LIST_CONTACT_SUCCESS,
-    FETCHING_LIST_CONTACT_ERROR
-
+    FETCHING_DETAIL_CONTACT,
+    FETCHING_DETAIL_CONTACT_SUCCESS,
+    FETCHING_DETAIL_CONTACT_ERROR
 } from '../actions/types';
 
 const INITIAL_STATE = {
     isLoading: false,
-    ListContacts: [],
+    DetailContacts: [],
     error: undefined
 }
 
 export default function contacts(state = INITIAL_STATE, action) {
     switch (action.type) {
-        case FETCHING_LIST_CONTACT:
+        case FETCHING_DETAIL_CONTACT:
             return {
                 ...state,
                 isLoading: true,
             }
-        case FETCHING_LIST_CONTACT_SUCCESS:
+        case FETCHING_DETAIL_CONTACT_SUCCESS:
             return {
                 ...state,
                 isLoading: false,
-                ListContacts: action.contact,
+                DetailContacts: action.contact,
                 error: undefined
             }
-        case FETCHING_LIST_CONTACT_ERROR:
+        case FETCHING_DETAIL_CONTACT_ERROR:
             return {
                 ...state,
                 isLoading: false,

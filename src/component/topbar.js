@@ -23,7 +23,6 @@ const Add = ({componentId, ...props}) => {
 
 
     const ModeContact =(mode="add")=> {
-        // Navigation.push(componentId, navigation.views.actionContact());
         Navigation.showModal(navigation.actionContacts(mode));
     }
 

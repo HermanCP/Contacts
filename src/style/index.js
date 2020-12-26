@@ -4,6 +4,7 @@ export const colors = {
     green: '#33d799',
     greyBorder: "#F8F5F5",
     grey: '#C8C5C5',
+    red: '#ff546d',
 };
 const { width, height } = Dimensions.get("window");
 
@@ -46,8 +47,8 @@ export default StyleSheet.create({
     },
     listContainer: {
         backgroundColor: colors.withe,
-        borderBottomWidth:1,
-        borderBottomColor:colors.greyBorder,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.greyBorder,
         padding: 20,
         flexDirection: 'row',
         alignItems: 'center'
@@ -84,9 +85,22 @@ export default StyleSheet.create({
     },
     Button: {
         borderRadius: 4,
-        padding:20,
+        padding: 20,
         justifyContent: 'center',
         alignItems: 'center'
     },
+    BtnBorder: {
+        width: '100%',
+        padding: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 3
+    },
+    ViewContacts: {
+        padding: 20, 
+        flexDirection: 'row', 
+        borderBottomWidth: 1, 
+        borderBottomColor: colors.greyBorder
+    }
 
 });

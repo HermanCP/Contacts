@@ -6,10 +6,11 @@ import React, {
 import {
     View,
     Text,
-    ActivityIndicator,
+    RefreshControl,
     FlatList,
     Image,
-    TouchableOpacity
+    TouchableOpacity,
+    ScrollView
 } from 'react-native'
 import { Navigation } from 'react-native-navigation';
 import navigation from '../Navigation';
@@ -21,19 +22,27 @@ import { GetListContacts } from '../redux/actions/contactAction'
 
 const ContactComponent = ({ componentId, ...props }) => {
     const { isLoading, contact, error } = props;
+    const [refreshing, setrefreshing] = useState(false)
+
     useEffect(() => {
         getContact()
     }, [])
+
     const getContact = useCallback(async () => {
         props.dispatch(GetListContacts())
 
     }, [])
 
-
     const ViewContacts = (id) => {
         Navigation.push(componentId, navigation.views.ViewContacts(id));
     }
 
+    const _onRefresh = () => {
+        setrefreshing(true)
+        getContact().then(() => {
+            setrefreshing(false)
+        })
+    }
 
     return (
         <View style={styles.container}>
@@ -44,21 +53,43 @@ const ContactComponent = ({ componentId, ...props }) => {
                     <>
                         {
                             error ?
-                                <View style={{justifyContent:'center', alignItems:'center'}}>
-                                    <Text>Terjadi kesalahan pada server</Text>
-                                </View>
+                                <ScrollView
+                                    refreshControl={
+                                        <RefreshControl
+                                            refreshing={refreshing}
+                                            onRefresh={_onRefresh}
+                                            progressBackgroundColor={colors.withe}
+                                            enabled={true}
+                                            progressViewOffset={0}
+                                            colors={[colors.green]}
+                                        />}
+                                >
+                                    <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                        <Text>Terjadi kesalahan pada server</Text>
+                                    </View>
+                                </ScrollView>
                                 :
                                 <View>
                                     <FlatList
                                         data={contact}
+                                        refreshControl={
+                                            <RefreshControl
+                                                refreshing={refreshing}
+                                                onRefresh={_onRefresh}
+                                                progressBackgroundColor={colors.withe}
+                                                enabled={true}
+                                                progressViewOffset={0}
+                                                colors={[colors.green]}
+                                            />
+                                        }
                                         renderItem={({ item, index }) => (
                                             <TouchableOpacity activeOpacity={.7} onPress={() => ViewContacts(item.id)} style={styles.listContainer}>
                                                 <View style={styles.cyrcleImage}>
-                                                        {
-                                                            item.avatar !== null ?
-                                                                <Image source={{ uri: item.avatar }} style={{ height: 50, width: 50, borderRadius: 100 }} />
-                                                                : <Image source={require('../images/profile.png')} style={{ height: 40, width: 40 }} />
-                                                        }
+                                                    {
+                                                        item.avatar !== null ?
+                                                            <Image source={{ uri: item.avatar }} style={{ height: 50, width: 50, borderRadius: 100 }} />
+                                                            : <Image source={require('../images/profile.png')} style={{ height: 40, width: 40 }} />
+                                                    }
                                                 </View>
                                                 <View style={{ marginHorizontal: 20 }}>
                                                     <Text>{item.firstName}</Text>

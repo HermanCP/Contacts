@@ -9,7 +9,6 @@ import {
 const Loaderscreen = props => {
   const {
     loading,
-    ...attributes
   } = props;
 
   return (

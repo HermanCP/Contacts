@@ -1,117 +1,136 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
     View,
     Text,
     TextInput,
     TouchableOpacity,
-    KeyboardAvoidingView,
     Platform,
     Image,
-    SafeAreaView,
-    FlatList,
     Dimensions,
-    Animated
 } from 'react-native'
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import {GetListContacts} from '../redux/actions/contactAction'
+import { GetListContacts } from '../redux/actions/contactAction'
+import { GetDetailContacts } from '../redux/actions/detailaction'
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker'
 import { Navigation } from 'react-native-navigation';
 import navigation from '../Navigation';
 import styles, { colors } from '../style'
 import Service from '../service'
 import Loader from '../loading/LoaderInScreen'
+import LoaderModal from '../loading/LoaderModal'
 import Toast from 'react-native-simple-toast';
 const { width, height } = Dimensions.get("window");
 
 Navigation.events().registerNavigationButtonPressedListener(
     ({ buttonId, componentId }, { ...props }) => {
-        console.log(buttonId)
         if (buttonId === 'Main.Contact.Component') {
             Navigation.dismissModal(componentId)
         }
     });
 
 const ActionContact = ({ componentId, ...props }) => {
-    const { mode } = props
-    const [isbuttonenable, setIsbuttonenable] = useState(true)
+    const { mode, id } = props
+    const [isbuttonenable, setIsbuttonenable] = useState(false)
     const [firstName, setFirsname] = useState(null)
+    const [validateFirstName, setValidateFirstname] = useState(false)
     const [lastName, setLasname] = useState(null)
+    const [validateLastName, setValidateLastName] = useState(false)
     const [mobile, setMobile] = useState(null)
     const [email, setEmail] = useState(null)
     const [validateEmail, setvalidateEmail] = useState(false)
     const [validateEmailError, setValidateEmailError] = useState(false)
     const [validatePhone, setvalidatePhone] = useState(false)
-    const [isfocused, setisFocused] = useState(false)
     const [foto, setFoto] = useState(null)
+    const [validateFoto, setValidateFoto] = useState(false)
     const [fileSend, setFileSend] = useState(null)
     const [loadingImage, setLoadingImage] = useState(false)
     const [loadingHttp, setLoadingHttp] = useState(false)
+    const [loadingModal, setLoadingModal] = useState(true)
+
+    useEffect(() => {
+        if (mode === 'edit') {
+            async function Detail() {
+                await getDetail();
+            }
+            Detail();
+        } else {
+            setLoadingModal(false)
+        }
+    }, [])
+
+    const getDetail = async () => {
+        Service.GetContacts(id)
+            .then(response => {
+                setTimeout(() => {
+                    setLoadingModal(false)
+                    setvalidateEmail(true)
+                }, 1000);
+
+                if (response.status === 200) {
+                    setFirsname(response.data.data.firstName)
+                    setLasname(response.data.data.lastName)
+                    setMobile(response.data.data.mobile)
+                    setEmail(response.data.data.email)
+                    setFoto(response.data.data.avatar)
+
+                } else if (response.status === 201) {
+                    setLoadingHttp(false)
+                }
+
+            })
+            .catch(e => {
+                setLoadingHttp(false)
+                console.log(e);
+            });
+    }
 
     const onChangeFirstName = (val) => {
         if (val === '') {
-            setIsbuttonenable(true)
+            setFirsname(val)
+            setValidateFirstname(true)
+        } else {
+            setFirsname(val)
+            setValidateFirstname(false)
         }
-        setFirsname(val)
-        if (firstName !== null && lastName !== null && fileSend !== null && validateEmail === true && validatePhone === true) return setIsbuttonenable(false)
     }
     const onChangeLastName = (val) => {
-        console.log(val)
         if (val === '') {
-            console.log('masuk gak')
-            setIsbuttonenable(true)
+            setLasname(val)
+            setValidateLastName(true)
+        } else {
+            setLasname(val)
+            setValidateLastName(false)
         }
-        setLasname(val)
-        if (firstName !== null && lastName !== null && fileSend !== null && validateEmail === true && validatePhone === true) return setIsbuttonenable(false)
+
     }
     const onChangeMobile = (val) => {
         if (val === '') {
-            setIsbuttonenable(true)
-        }
-        if (val.length < 7) {
-            setMobile('')
-            setvalidatePhone(false)
-            setIsbuttonenable(true)
-        } else {
             setMobile(val)
-            setvalidatePhone(true)
+        } else {
+            if (val.length < 7) {
+                setMobile(val)
+                setvalidatePhone(false)
+            } else {
+                setMobile(val)
+                setvalidatePhone(false)
+            }
         }
-        if (firstName !== null && lastName !== null && fileSend !== null && validateEmail === true && validatePhone === true) return setIsbuttonenable(false)
     }
     const onChangeEmail = (val) => {
         if (val === '') {
-            setIsbuttonenable(true)
-        }
-        setEmail(val)
-        let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-        if (reg.test(val) === false) {
-            setvalidateEmail(false)
-            setIsbuttonenable(true)
+            setEmail(val)
         } else {
-            setvalidateEmail(true)
-            setValidateEmailError(false)
-        }
-        if (firstName !== null && lastName !== null && fileSend !== null && validateEmail === true && validatePhone === true) return setIsbuttonenable(false)
-    }
-    const handleBlur = (event, { ...props }) => {
-        // console.log('cek email', )
-        if (email !== null) {
             let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-            if (reg.test(email) === false) {
+            if (reg.test(val) === false) {
+                setEmail(val)
                 setvalidateEmail(false)
-                setIsbuttonenable(true)
                 setValidateEmailError(true)
             } else {
+                setEmail(val)
                 setvalidateEmail(true)
                 setValidateEmailError(false)
-                if (firstName !== null && lastName !== null && validateEmail === false && validatePhone === true) return setIsbuttonenable(false)
             }
-        }
-
-        setisFocused(false)
-
-        if (props.onBlur) {
-            props.onBlur(event);
-
         }
     }
     const choosePicture = () => {
@@ -126,17 +145,35 @@ const ActionContact = ({ componentId, ...props }) => {
         };
         launchImageLibrary(options, (response) => {
             setLoadingImage(false)
-
             const realPath = Platform.OS === 'ios' ? response.uri.replace('file://', '') : response.uri;
             setFoto(realPath)
             setFileSend(response)
-
-            console.log('file send', fileSend)
-
+            setValidateFoto(false)
 
         });
     }
     const AddContact = () => {
+        if (!foto) {
+            setValidateFoto(true)
+            return;
+        }
+
+        if (!firstName || !firstName.trim()) {
+            setValidateFirstname(true)
+            return;
+        }
+        if (!lastName || !lastName.trim()) {
+            setValidateLastName(true)
+            return;
+        }
+        if (!mobile || !mobile.trim()) {
+            setvalidatePhone(true)
+            return;
+        }
+        if (!validateEmail) {
+            setValidateEmailError(true)
+            return;
+        }
         setLoadingHttp(true)
         let data = {
             firstName: firstName,
@@ -145,29 +182,55 @@ const ActionContact = ({ componentId, ...props }) => {
             files: fileSend,
             email: email
         }
-        console.log(data)
-        Service.AddContact(data)
-            .then(response => {
-                console.log('response', response);
-                const res = JSON.parse(response.data)
-                setLoadingHttp(false)
-                if (res.status === true) {
-                    props.dispatch(GetListContacts())
-                    Toast.showWithGravity('Berhasil tambah data', Toast.LONG, Toast.TOP)
-                    Navigation.dismissModal(componentId)
-                } else if (res.status == false) {
-                    Toast.showWithGravity('Terjadi kesalahan pada server, mohon tunggu beberapa saat', Toast.LONG, Toast.TOP)
-                } else {
-                }
+        if (mode === 'edit') {
+            Service.updateContacts(data, id)
+                .then(response => {
+                    let res;
+                    if (response.status === 200) {
+                        res = null;
+                    } else {
+                        res = JSON.parse(response.data);
+                    }
+                    setLoadingHttp(false)
+                    if (response.status === 200 || res.status === true) {
+                        props.GetListContacts()
+                        props.GetDetailContacts(id)
+                        Toast.showWithGravity('Berhasil update data', Toast.LONG, Toast.TOP)
+                        Navigation.dismissModal(componentId)
+                    } else if (response.status == false || res.status === false) {
+                        Toast.showWithGravity('Terjadi kesalahan pada server, mohon tunggu beberapa saat', Toast.LONG, Toast.TOP)
+                    } else {
+                    }
 
-            })
-            .catch(e => {
-                Toast.showWithGravity('Server sedang padat, mohon tunggu beberapa saat lagi', Toast.LONG, Toast.TOP)
-                setLoadingHttp(false)
-                console.log(e);
-            });
+                })
+                .catch(e => {
+                    Toast.showWithGravity('Server sedang padat, mohon tunggu beberapa saat lagi', Toast.LONG, Toast.TOP)
+                    setLoadingHttp(false)
+                    console.log(e);
+                });
+        } else {
+            Service.AddContact(data)
+                .then(response => {
+                    const res = JSON.parse(response.data)
+                    setLoadingHttp(false)
+                    if (res.status === true) {
+                        props.GetListContacts()
+                        Toast.showWithGravity('Berhasil tambah data', Toast.LONG, Toast.TOP)
+                        Navigation.dismissModal(componentId)
+                    } else if (res.status == false) {
+                        Toast.showWithGravity('Terjadi kesalahan pada server, mohon tunggu beberapa saat', Toast.LONG, Toast.TOP)
+                    } else {
+                    }
+
+                })
+                .catch(e => {
+                    Toast.showWithGravity('Server sedang padat, mohon tunggu beberapa saat lagi', Toast.LONG, Toast.TOP)
+                    setLoadingHttp(false)
+                    console.log(e);
+                });
+        }
+
     }
-    console.log(foto)
     return (
         <View style={styles.container}>
             <View style={{ flex: 1, }}>
@@ -190,10 +253,16 @@ const ActionContact = ({ componentId, ...props }) => {
                                                 </View>
                                             </>
                                     }
+
                                 </>
                         }
 
                     </TouchableOpacity>
+                    {
+                        validateFoto ?
+                            <Text style={{ color: 'red', fontSize: 10, fontWeight: '600', marginHorizontal: 5 }}>Foto tidk boleh kosong</Text>
+                            : null
+                    }
 
                 </View>
                 <View style={{ padding: 20 }}>
@@ -202,11 +271,16 @@ const ActionContact = ({ componentId, ...props }) => {
                         style={styles.TitleInput}
                         placeholder='Ex: Edo'
                         autoCapitalize="none"
-                        clearButtonMode="always"
                         autoCorrect={false}
                         underlineColorAndroid={colors.greyBorder}
+                        value={firstName}
                         onChangeText={val => onChangeFirstName(val)}
                     />
+                    {
+                        validateFirstName ?
+                            <Text style={{ color: 'red', fontSize: 10, fontWeight: '600', marginHorizontal: 5 }}>First Name tidak boleh kosong</Text>
+                            : null
+                    }
                 </View>
                 <View style={{ padding: 20 }}>
                     <Text style={styles.subtitlePrimary}>Last Name</Text>
@@ -214,11 +288,16 @@ const ActionContact = ({ componentId, ...props }) => {
                         style={styles.TitleInput}
                         placeholder='Ex: dudung'
                         autoCapitalize="none"
-                        clearButtonMode="always"
                         autoCorrect={false}
                         underlineColorAndroid={colors.greyBorder}
+                        value={lastName}
                         onChangeText={val => onChangeLastName(val)}
                     />
+                    {
+                        validateLastName ?
+                            <Text style={{ color: 'red', fontSize: 10, fontWeight: '600', marginHorizontal: 5 }}>Last Name tidak boleh kosong</Text>
+                            : null
+                    }
                 </View>
                 <View style={{ padding: 20 }}>
                     <Text style={styles.subtitlePrimary}>Mobile</Text>
@@ -227,13 +306,18 @@ const ActionContact = ({ componentId, ...props }) => {
                         placeholder='Ex : 0813288xxxxx'
                         placeholderTextColor='#adb4bc'
                         keyboardType={'phone-pad'}
-                        clearButtonMode="always"
                         returnKeyType='done'
                         autoCapitalize='none'
                         autoCorrect={false}
                         underlineColorAndroid={colors.greyBorder}
+                        defaultValue={mobile}
                         onChangeText={val => onChangeMobile(val)}
                     />
+                    {
+                        validatePhone ?
+                            <Text style={{ color: 'red', fontSize: 10, fontWeight: '600', marginHorizontal: 5 }}>No Hp tidak boleh kosong</Text>
+                            : null
+                    }
                 </View>
                 <View style={{ padding: 20 }}>
                     <Text style={styles.subtitlePrimary}>Email</Text>
@@ -241,10 +325,9 @@ const ActionContact = ({ componentId, ...props }) => {
                         style={styles.TitleInput}
                         placeholder='Ex: Email@gmail.com'
                         autoCapitalize="none"
-                        clearButtonMode="always"
                         autoCorrect={false}
-                        // /onBlur={handleBlur}
                         underlineColorAndroid={colors.greyBorder}
+                        value={email}
                         onChangeText={val => onChangeEmail(val)}
                     />
                     {
@@ -254,7 +337,7 @@ const ActionContact = ({ componentId, ...props }) => {
                     }
                 </View>
             </View>
-            <View style={{ flex: .15, margin: 10 }}>
+            <View style={{ flex: .15, margin: 10, }}>
                 <TouchableOpacity activeOpacity={0.5}
 
                     disabled={isbuttonenable ? true : false}
@@ -269,6 +352,7 @@ const ActionContact = ({ componentId, ...props }) => {
                     }
                 </TouchableOpacity>
             </View>
+            <LoaderModal loading={loadingModal} />
         </View>
     )
 }
@@ -278,6 +362,11 @@ const mapStateToProps = state => ({
     contact: state.contact.ListContacts,
     error: state.contact.error,
 })
+function mapDispatchToProps(dispatch) {
+    return {
+        ...bindActionCreators({ GetDetailContacts, GetListContacts }, dispatch)
+    }
+}
 
 
-export default connect(mapStateToProps, null)(ActionContact)
+export default connect(mapStateToProps, mapDispatchToProps)(ActionContact)

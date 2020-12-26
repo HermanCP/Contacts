@@ -25,52 +25,46 @@ const AddContact = async(data) => {
       ],
     )
 };
-const updateUser = async(data) => {
+const updateContacts = async(data,id) => {
   console.log('data  user ======>', data)
   let nonfile ={
-    user_id: String(data.id),
-    name_personel:data.name_personel,
-    nrp_nip: data.nrp_nip,
-    no_hp: data.no_hp,
-    id_pangkat: String(data.pangkat),
-    id_jabatan: String(data.jabatan),
-    id_polda:String(data.polda),
-    id_polres: String(data.polres),
-    id_polsek: String(data.polsek),
-    password:data.password,
-    confirm_password:data.confirm_password
+    firstName: data.firstName,
+    lastName:data.lastName,
+    mobile: data.mobile,
+    email: data.email,
   }
-  if(data.file == null){
-     return http.post(`/updateUser`, nonfile)
+  if(data.files == null){
+    return http.put(`/UpdateContacts/${id}`, nonfile)
   }else{
+    let t = `http://172.20.10.3:3000/api/v1/UpdateContacts/${id}`
+    console.log('masuk ada file',t)
+    const realPath = Platform.OS === 'ios' ? data.files.uri.replace('file://', '') : data.files.uri;
     return  RNFetchBlob.fetch(
-      'POST',
-      'http://222.124.251.69:443/api/v1/updateUser',
+      'PUT',
+      `http://172.20.10.3:3000/api/v1/UpdateContacts/${id}`,
       {
         'Content-Type': 'multipart/form-data',
       },
       [
-        {name: 'files', filename: data.file.fileName, data: RNFetchBlob.wrap(data.file.uri)},
-        {name : 'name_personel', data:data.name_personel},
-        {name : 'nrp_nip', data:data.nrp_nip},
-        {name : 'no_hp', data:data.no_hp},
-        {name : 'id_pangkat', data:String(data.pangkat)},
-        {name : 'id_jabatan', data:String(data.jabatan)},
-        {name : 'id_polda', data:String(data.polda)},
-        {name : 'id_polres', data:String(data.polres)},
-        {name : 'id_polsek', data:String(data.polsek)}, 
-        {name : 'user_id', data:String(data.id)}, 
+        {name: 'files', filename: data.files.fileName, data: RNFetchBlob.wrap(realPath)},
+        {name : 'firstName', data:data.firstName},
+        {name : 'lastName', data:data.lastName},
+        {name : 'mobile', data:data.mobile},
+        {name : 'email', data:data.email}
       ],
     )
   }
-  
 };
 const GetContacts =(id)=> {
   return http.get(`/GetContacts/${id}`)
+}
+const DeleteContacts =(id)=> {
+  return http.delete(`/DeleteContacts/${id}`)
 }
 
 export default {
     AddContact,
     GetContacts,
-    updateUser,
+    updateContacts,
+    DeleteContacts
 };

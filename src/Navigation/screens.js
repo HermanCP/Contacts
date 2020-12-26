@@ -10,10 +10,10 @@ const MainContact = () =>({
   },
 })
 
-const actionContacts = (mode) => ({
+const actionContacts = (mode,id) => ({
     stack: {
       children: [{
-        component: views.actionContact(mode)
+        component: views.actionContact(mode,id)
       }]
     }
 })

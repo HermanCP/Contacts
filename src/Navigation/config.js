@@ -35,5 +35,4 @@ export function registerScreens() {
   Navigation.registerComponent('Icon.Add', () => IconAdd);
   Navigation.registerComponent('Icon.Edit', () => IconEdit);
   
-  
 }

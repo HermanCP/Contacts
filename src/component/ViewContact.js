@@ -2,26 +2,24 @@ import React, { useEffect, useState } from 'react'
 import {
     View,
     Text,
-    TextInput,
     TouchableOpacity,
-    KeyboardAvoidingView,
     Platform,
     Image,
-    SafeAreaView,
-    FlatList,
-    Dimensions,
-    Animated,
     Linking
 } from 'react-native'
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { AddFavorites, RemoveFavorites } from '../redux/actions/favoritesAction'
-import {GetListContacts} from '../redux/actions/contactAction'
+import { GetListContacts } from '../redux/actions/contactAction'
+import { GetDetailContacts } from '../redux/actions/detailaction'
 import { Navigation } from 'react-native-navigation';
 import navigation from '../Navigation';
 import styles, { colors } from '../style'
 import Service from '../service'
-const { width, height } = Dimensions.get("window");
+import LoaderModal from '../loading/LoaderModal'
+import Toast from 'react-native-simple-toast';
+
+
 
 Navigation.events().registerNavigationButtonPressedListener(
     ({ buttonId, componentId }) => {
@@ -30,10 +28,12 @@ Navigation.events().registerNavigationButtonPressedListener(
         }
     });
 
-const ActionContact = props => {
+const ActionContact = ({ componentId, ...props }) => {
     const [loadingHttp, setLoadingHttp] = useState(true)
     const [data, setData] = useState(null)
     const [selectedFavorites, setSelectedfavorites] = useState(false)
+    const { DetailContacts } = props.detailContacts
+
 
     useEffect(() => {
         async function Detail() {
@@ -43,13 +43,12 @@ const ActionContact = props => {
     }, [])
 
     const getDetail = async () => {
+        props.GetDetailContacts(props.id)
         Service.GetContacts(props.id)
             .then(response => {
-                console.log('responce ', response)
                 if (response.status === 200) {
                     setLoadingHttp(false)
-                    setData(response.data.data)
-                    if(response.data.data.isFavorites === 1){
+                    if (response.data.data.isFavorites === 1) {
                         setSelectedfavorites(true)
                     }
                 } else if (response.status === 201) {
@@ -65,33 +64,33 @@ const ActionContact = props => {
 
     const Message = async () => {
         const separator = Platform.OS === 'ios' ? '&' : '?'
-        const url = `sms:${data.mobile}${separator}body=''`
+        const url = `sms:${DetailContacts.mobile}${separator}body=''`
         await Linking.openURL(url)
     }
     const SendEmail = () => {
-        Linking.openURL(`mailto:${data.email}`)
+        Linking.openURL(`mailto:${DetailContacts.email}`)
     }
     const CallNumber = () => {
-        let phoneNumber = data.mobile;
+        let phoneNumber = DetailContacts.mobile;
         if (Platform.OS !== 'android') {
-          phoneNumber = `telprompt:${data.mobile}`;
+            phoneNumber = `telprompt:${DetailContacts.mobile}`;
         }
-        else  {
-          phoneNumber = `tel:${data.mobile}`;
+        else {
+            phoneNumber = `tel:${DetailContacts.mobile}`;
         }
         Linking.canOpenURL(phoneNumber)
-        .then(supported => {
-          if (!supported) {
-            Alert.alert('Phone number is not available');
-          } else {
-            return Linking.openURL(phoneNumber);
-          }
-        })
-        .catch(err => console.log(err));
-      };
+            .then(supported => {
+                if (!supported) {
+                    Alert.alert('Phone number is not available');
+                } else {
+                    return Linking.openURL(phoneNumber);
+                }
+            })
+            .catch(err => console.log(err));
+    };
     const addToFavorites = () => {
         let send = {
-            id: data.id
+            id: props.id
         }
         if (!selectedFavorites) {
             setSelectedfavorites(selectedFavorites => !selectedFavorites)
@@ -104,7 +103,30 @@ const ActionContact = props => {
         }
 
     }
-    console.log(data)
+
+    const DeleteAction = () => {
+        setLoadingHttp(true)
+        console.log(props.id)
+        Service.DeleteContacts(props.id)
+        .then(response => {
+            console.log(response)
+            if (response.status === 200) {
+                Toast.showWithGravity('Data berhasil di hapus', Toast.LONG, Toast.TOP)
+                setLoadingHttp(false)
+                props.GetListContacts()
+                Navigation.pop(componentId)
+            } else if (response.status === 201) {
+                setLoadingHttp(false)
+                Toast.showWithGravity('Terjadi kesalahan pada server, mohon tunggu beberapa saat', Toast.LONG, Toast.TOP)
+            }
+
+        })
+        .catch(e => {
+            Toast.showWithGravity('Server sedang padat, mohon tunggu beberapa saat lagi.', Toast.LONG, Toast.TOP)
+            setLoadingHttp(false)
+            console.log(e);
+        });
+    }
 
     return (
         <View style={styles.container}>
@@ -121,8 +143,8 @@ const ActionContact = props => {
                     }}>
                         <View style={{}}>
                             {
-                                data !== null ?
-                                    <Image source={{ uri: data.avatar }} style={{ height: 100, width: 100, borderRadius: 100 }} />
+                                DetailContacts.avatar ?
+                                    <Image source={{ uri: DetailContacts.avatar }} style={{ height: 100, width: 100, borderRadius: 100 }} />
                                     :
                                     <Image source={require('../images/profile.png')} style={{ height: 50, width: 50 }} />
                             }
@@ -130,7 +152,7 @@ const ActionContact = props => {
                         </View>
                     </View>
                     <View>
-                        <Text style={styles.titlePrimary}>{data !== null ? `${data.firstName} ${data.lastName}` : ''}</Text>
+                        <Text style={styles.titlePrimary}>{DetailContacts.firstName} {DetailContacts.lastName}</Text>
                     </View>
                     <View style={{ flex: 1, flexDirection: 'row' }}>
                         <TouchableOpacity activeOpacity={.6} onPress={() => Message()} style={styles.actionBox}>
@@ -161,15 +183,32 @@ const ActionContact = props => {
                 </View>
             </View>
             <View style={{ flex: 2 }}>
-                <View style={{ padding: 20, flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.greyBorder }}>
+                <View style={styles.ViewContacts}>
                     <Text style={styles.titleList}>Mobile : </Text>
-                    <Text style={[styles.subtitlePrimary, { marginHorizontal: 20 }]}>{data !== null ? data.mobile : ''}</Text>
+                    <Text style={[styles.subtitlePrimary, { marginHorizontal: 20 }]}>{DetailContacts.mobile}</Text>
                 </View>
-                <View style={{ padding: 20, flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.greyBorder }}>
+                <View style={styles.ViewContacts}>
                     <Text style={styles.titleList}>Email : </Text>
-                    <Text style={[styles.subtitlePrimary, { marginHorizontal: 20 }]}>{data !== null ? data.email : ''}</Text>
+                    <Text style={[styles.subtitlePrimary, { marginHorizontal: 20 }]}>{DetailContacts.email}</Text>
                 </View>
+                <View style={[styles.ViewContacts, {borderBottomWidth:0}]}>
+                <TouchableOpacity
+                    onPress={() => DeleteAction()}
+                    style={[styles.BtnBorder, {
+                        borderColor: colors.red,
+                        borderWidth: 1,
+                        borderRadius: 25
+                    }]}
+                >
+                    <Text style={[styles.titleList, {
+                        color: colors.red,
+
+                    }]}>Hapus</Text>
+                </TouchableOpacity>
+                </View>
+                
             </View>
+            <LoaderModal loading={loadingHttp}/>
         </View>
     )
 }
@@ -178,12 +217,13 @@ function mapStateToProps(state) {
     return {
         isLoading: state.isLoading,
         isFavorite: state.isFavorite,
+        detailContacts: state.detailContacts
     }
 }
 
 function mapDispatchToProps(dispatch) {
     return {
-        ...bindActionCreators({ AddFavorites, RemoveFavorites,GetListContacts }, dispatch)
+        ...bindActionCreators({ AddFavorites, RemoveFavorites, GetListContacts, GetDetailContacts }, dispatch)
     }
 }
 
